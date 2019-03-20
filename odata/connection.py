@@ -1,13 +1,16 @@
 # -*- coding: utf-8 -*-
 
-import json
 import functools
+import json
 import logging
 
-import requests
-from requests.exceptions import RequestException
+from urllib.parse import urlencode, quote
 
+import requests
 from odata import version
+from requests.compat import basestring
+from requests.exceptions import RequestException
+from requests.utils import to_key_val_list
 from .exceptions import ODataError, ODataConnectionError
 
 
@@ -43,6 +46,21 @@ class ODataConnection(object):
 
         if self.auth is not None:
             kwargs['auth'] = self.auth
+
+        # fix space quoting for query string: '%20' instead of '+'
+        params = kwargs.get('params')
+        if params and hasattr(params, '__iter__'):
+            result = []
+            for k, vs in to_key_val_list(params):
+                if isinstance(vs, basestring) or not hasattr(vs, '__iter__'):
+                    vs = [vs]
+                for v in vs:
+                    if v is not None:
+                        result.append(
+                            (k.encode('utf-8') if isinstance(k, str) else k,
+                             v.encode('utf-8') if isinstance(v, str) else v))
+
+            kwargs['params'] = urlencode(result, doseq=True, quote_via=quote)
 
     @catch_requests_errors
     def _do_get(self, *args, **kwargs):
