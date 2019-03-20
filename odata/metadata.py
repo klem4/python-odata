@@ -21,9 +21,11 @@ from .enumtype import EnumType, EnumTypeProperty
 class MetaData(object):
 
     log = logging.getLogger('odata.metadata')
+
+    # FIXME klem4: read from environment or pass from args!
     namespaces = {
-        'edm': 'http://docs.oasis-open.org/odata/ns/edm',
-        'edmx': 'http://docs.oasis-open.org/odata/ns/edmx'
+        'edm': 'http://schemas.microsoft.com/ado/2009/11/edm',
+        'edmx': 'http://schemas.microsoft.com/ado/2007/06/edmx'
     }
 
     property_types = {
@@ -356,7 +358,7 @@ class MetaData(object):
 
         for entity_property in xmlq(entity_element, 'edm:Property'):
             p_name = entity_property.attrib['Name']
-            p_type = entity_property.attrib['Type']
+            p_type = entity_property.attrib.get('Type', '')
 
             is_collection, p_type = self._type_is_collection(p_type)
             is_computed_value = False
@@ -377,7 +379,7 @@ class MetaData(object):
 
         for nav_property in xmlq(entity_element, 'edm:NavigationProperty'):
             p_name = nav_property.attrib['Name']
-            p_type = nav_property.attrib['Type']
+            p_type = nav_property.attrib.get('Type', '')
             p_foreign_key = None
 
             ref_constraint = xmlq(nav_property, 'edm:ReferentialConstraint')
@@ -401,7 +403,8 @@ class MetaData(object):
         }
         for enum_member in xmlq(enumtype_element, 'edm:Member'):
             member_name = enum_member.attrib['Name']
-            member_value = int(enum_member.attrib['Value'])
+            value = enum_member.attrib.get('Value')
+            member_value = int(value) if value is not None else value
             enum['members'].append({
                 'name': member_name,
                 'value': member_value,
