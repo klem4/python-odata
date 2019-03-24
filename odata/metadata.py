@@ -28,6 +28,10 @@ class MetaData(object):
         'edmx': 'http://schemas.microsoft.com/ado/2007/06/edmx'
     }
 
+    # prop_name => type(for OData v3 compatible)
+    property_name_types = {}
+
+    # prop_type => type
     property_types = {
         'Edm.Int16': IntegerProperty,
         'Edm.Int32': IntegerProperty,
@@ -358,7 +362,8 @@ class MetaData(object):
 
         for entity_property in xmlq(entity_element, 'edm:Property'):
             p_name = entity_property.attrib['Name']
-            p_type = entity_property.attrib.get('Type', '')
+            p_type = entity_property.attrib.get(
+                'Type', self.property_name_types.get(p_name, ''))
 
             is_collection, p_type = self._type_is_collection(p_type)
             is_computed_value = False
@@ -379,7 +384,8 @@ class MetaData(object):
 
         for nav_property in xmlq(entity_element, 'edm:NavigationProperty'):
             p_name = nav_property.attrib['Name']
-            p_type = nav_property.attrib.get('Type', '')
+            p_type = nav_property.attrib.get(
+                'Type', self.property_name_types.get(p_name, ''))
             p_foreign_key = None
 
             ref_constraint = xmlq(nav_property, 'edm:ReferentialConstraint')
