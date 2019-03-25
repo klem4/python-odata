@@ -40,6 +40,7 @@ class MetaData(object):
         'Edm.Single': DecimalProperty,
         'Edm.Decimal': DecimalProperty,
         'Edm.DateTimeOffset': DatetimeProperty,
+        'Edm.DateTime': DatetimeProperty,
         'Edm.Boolean': BooleanProperty,
         'Edm.Guid': UUIDProperty,
     }
