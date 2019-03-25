@@ -276,7 +276,7 @@ class DatetimeProperty(PropertyBase):
     def escape_value(self, value):
         if value is None:
             return 'null'
-        return value.isoformat()
+        return f"datetime'{value.isoformat()}'"
 
     def serialize(self, value):
         if isinstance(value, datetime.datetime):
